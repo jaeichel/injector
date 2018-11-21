@@ -1,3 +1,5 @@
+// https://www.guggenheim.org/artwork/*
+
 function getArtData() {
   return {
     title: document.getElementsByTagName('article')[0].children[0].children[2].children[1].children[1].children[1].innerText,
@@ -36,4 +38,6 @@ function insertDownloadJpegLink() {
     });
 }
 
-insertDownloadJpegLink();
+if (document.getElementsByTagName('figure').length > 0) {
+  insertDownloadJpegLink();
+}
