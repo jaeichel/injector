@@ -18,7 +18,21 @@ function collectItems() {
 
 function parseManufacturer(iconPath) {
   const names = [
+    'Anvil',
+    'Aegis',
+    'Argo',
+    'Aopoa',
+    'Banu',
+    'Consolidated',
+    'Crusader',
+    'Drake',
+    'Esperia',
+    'Kruger',
+    'MISC',
     'Origin',
+    'RSI',
+    'Tumbril',
+    'Vanduul',
   ];
   return names.filter(name => iconPath.includes(name))[0];
 }
@@ -35,26 +49,37 @@ function findShip(name) {
       return div;
     })
     .then((div) => {
-      const ship = div.getElementsByClassName('ship-item')[0];
-      shipId = ship.getAttribute('data-ship-id')
-      detailsUri = ship.firstElementChild.firstElementChild.href;
-      return fetch(detailsUri);
-    })
-    .then(res => res.text())
-    .then((text)  => {
-      const div = document.createElement('html');
-      div.innerHTML = text;
-      return div;
-    })
-    .then(div => ({
-      name: div.getElementsByClassName('main-view')[0].firstElementChild.firstElementChild.innerText,
-      manufacturer: parseManufacturer(div.getElementsByClassName('headline')[0].firstElementChild.children[1].children[1].src),
-      detailsUri,
-      shipId,
-    }))
-    .catch(e => {
-      console.error(name, uri, detailsUri, e);
-      return undefined;
+      const shipItem = div.getElementsByClassName('ship-item');
+      if (shipItem.length > 0) {
+        const ship = shipItem[0];
+        shipId = ship.getAttribute('data-ship-id')
+        detailsUri = ship.firstElementChild.firstElementChild.href;
+        return fetch(detailsUri)
+        .then(res => res.text())
+        .then((text)  => {
+          const div = document.createElement('html');
+          div.innerHTML = text;
+          return div;
+        })
+        .then(div => ({
+          name: div.getElementsByClassName('main-view')[0].firstElementChild.firstElementChild.innerText,
+          manufacturer: parseManufacturer(div.getElementsByClassName('headline')[0].firstElementChild.children[1].children[1].src),
+          detailsUri,
+          shipId,
+        }))
+        .catch(e => {
+          console.error(name, uri, detailsUri, e);
+          return undefined;
+        });
+      } else {
+        const shortName = name.split(' ').slice(1).join(' ');
+        if (shortName.length > 0) {
+          return findShip(shortName);
+        } else {
+          console.error(name, uri, detailsUri, 'count not find');
+          return undefined;
+        }
+      }
     });
 }
 
