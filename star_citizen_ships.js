@@ -51,10 +51,12 @@ function findShip(name) {
       manufacturer: parseManufacturer(div.getElementsByClassName('headline')[0].firstElementChild.children[1].children[1].src),
       detailsUri,
       shipId,
-    }));
+    }))
+    .catch(e => {
+      console.error(name, uri, detailsUri, e);
+      return undefined;
+    });
 }
-
-
 
 window.ships = Promise.all(collectItems()
   .map(ship => findShip(ship)))
