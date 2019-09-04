@@ -135,6 +135,6 @@ function findShipPermuteName(ship) {
     });
 }
 
-window.ships = Promise.all(collectItems()
-  .map(ship => findShipPermuteName(ship)))
-  
+window.shipPromises = Promise.all(collectItems()
+  .map(ship => findShipPermuteName(ship)));
+
