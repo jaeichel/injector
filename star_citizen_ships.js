@@ -3,7 +3,15 @@ function colToArray(col) {
 }
 
 function collectItems() {
+  const pledgeNames = colToArray(document.getElementsByClassName('js-pledge-name'));
   const rows = colToArray(document.getElementsByClassName('row'));
+  for (let i = 0; i < rows.length; ++i) {
+    const rowItems = rows[i].getElementsByClassName('item');
+    for (let j = 0; j < rowItems.length; ++j) {
+      rowItems[j].setAttribute('pledgeName', pledgeNames[i].value);
+    }
+  }
+  
   const items = rows.map(row => colToArray(row.getElementsByClassName('item'))).flat();
   const contents = items
     .filter(item => item.getElementsByClassName('title')[0])
@@ -11,9 +19,10 @@ function collectItems() {
     .map(item => ({
       name: item.getElementsByClassName('title')[0].innerText,
       kind: item.getElementsByClassName('kind')[0].innerText,
+      pledgeName: item.getAttribute('pledgeName'),
     })).flat();
   const ships = contents.filter(item => item.kind === 'Ship');
-  return ships.map(ship => ship.name);
+  return ships;
 }
 
 function parseManufacturer(iconPath) {
@@ -37,7 +46,7 @@ function parseManufacturer(iconPath) {
   return names.filter(name => iconPath.includes(name))[0];
 }
 
-function findShip(searchName) {
+function findShip(searchName, pledgeName) {
   const uri = `https://robertsspaceindustries.com/pledge/ships?sort=store&search=${searchName}&itemType=ships`;
   let detailsUri;
   let shipId;
@@ -67,6 +76,7 @@ function findShip(searchName) {
           detailsUri,
           shipId,
           searchName,
+          pledgeName,
         }))
         .catch(e => {
           console.error(searchName, uri, detailsUri, e);
@@ -77,8 +87,10 @@ function findShip(searchName) {
     });
 }
 
-function findShipPermuteName(searchName) {
-  return findShip(searchName)
+function findShipPermuteName(ship) {
+  const searchName = ship.name;
+  const pledgeName = ship.pledgeName;
+  return findShip(searchName, pledgeName)
     .then(ship => {
         if (ship) {
           return ship;
@@ -88,22 +100,22 @@ function findShipPermuteName(searchName) {
         let shortName = searchName;
         while (shortName.split(' ').length > 1) {
           shortName = shortName.split(' ').slice(1).join(' ');
-          promises.push(findShip(shortName));
+          promises.push(findShip(shortName, pledgeName));
 
           if (shortName.split(' ').length > 1) {
             const shortNameB = shortName.split(' ').slice(0, -1).join(' ');
-            promises.push(findShip(shortNameB));
+            promises.push(findShip(shortNameB, pledgeName));
           }
         }
 
         shortName = searchName;
         while (shortName.split(' ').length > 1) {
           shortName = shortName.split(' ').slice(0, -1).join(' ');
-          promises.push(findShip(shortName));
+          promises.push(findShip(shortName, pledgeName));
 
           if (shortName.split(' ').length > 1) {
             const shortNameB = shortName.split(' ').slice(1).join(' ');
-            promises.push(findShip(shortNameB));
+            promises.push(findShip(shortNameB, pledgeName));
           }
         }
 
