@@ -27,7 +27,7 @@ function findShip(name) {
   const uri = `https://robertsspaceindustries.com/pledge/ships?  sort=store&search=${name}&itemType=ships`;
   let detailsUri;
   let shipId;
-  return fetch('https://robertsspaceindustries.com/pledge/ships?  sort=store&search=890%20jump&itemType=ships')
+  return fetch(uri)
     .then(res => res.text())
     .then((text) => {
       const div = document.createElement('html');
@@ -47,7 +47,7 @@ function findShip(name) {
       return div;
     })
     .then(div => ({
-      name: document.getElementsByClassName('main-view')[0].firstElementChild.firstElementChild.innerText,
+      name: div.getElementsByClassName('main-view')[0].firstElementChild.firstElementChild.innerText,
       manufacturer: parseManufacturer(div.getElementsByClassName('headline')[0].firstElementChild.children[1].children[1].src),
       detailsUri,
       shipId,
