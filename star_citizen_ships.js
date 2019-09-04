@@ -37,8 +37,8 @@ function parseManufacturer(iconPath) {
   return names.filter(name => iconPath.includes(name))[0];
 }
 
-function findShip(name) {
-  const uri = `https://robertsspaceindustries.com/pledge/ships?  sort=store&search=${name}&itemType=ships`;
+function findShip(searchName) {
+  const uri = `https://robertsspaceindustries.com/pledge/ships?sort=store&search=${searchName}&itemType=ships`;
   let detailsUri;
   let shipId;
   return fetch(uri)
@@ -62,27 +62,49 @@ function findShip(name) {
           return div;
         })
         .then(div => ({
-          name: div.getElementsByClassName('main-view')[0].firstElementChild.firstElementChild.innerText,
+          shipName: div.getElementsByClassName('main-view')[0].firstElementChild.firstElementChild.innerText,
           manufacturer: parseManufacturer(div.getElementsByClassName('headline')[0].firstElementChild.children[1].children[1].src),
           detailsUri,
           shipId,
+          searchName,
         }))
         .catch(e => {
-          console.error(name, uri, detailsUri, e);
+          console.error(searchName, uri, detailsUri, e);
           return undefined;
         });
-      } else {
-        const shortName = name.split(' ').slice(1).join(' ');
-        if (shortName.length > 0) {
-          return findShip(shortName);
-        } else {
-          console.error(name, uri, detailsUri, 'count not find');
-          return undefined;
-        }
       }
+      return undefined;
     });
 }
 
+function findShipPermuteName(searchName) {
+  const candidates = []
+  candidates.push(findShip(searchName));
+  
+  let shortName = searchName;
+  while (shortName.split(' ').length > 1) {
+    shortName = shortName.split(' ').slice(1).join(' ');
+    candidates.push(findShip(shortName));
+  }
+  
+  shortName = searchName;
+  while (shortName.split(' ').length > 1) {
+    shortName = shortName.split(' ').slice(0, -1).join(' ');
+    candidates.push(findShip(shortName));
+  }
+
+  validCandidates = candidates.filter(c => c);
+  if (validCandidates.length > 0) {
+    return validCandidates[0];
+  } else {
+    console.error(searchName, uri, detailsUri, 'count not find');
+    return {
+      searchName,
+      error: 'could not find',
+    };
+  }
+}
+
 window.ships = Promise.all(collectItems()
-  .map(ship => findShip(ship)))
+  .map(ship => findShipPermuteName(ship)))
   
