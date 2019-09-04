@@ -56,6 +56,6 @@ function findShip(name) {
 
 
 
-ships = await Promise.all(collectItems()
+ships = Promise.all(collectItems()
   .map(ship => findShip(ship)))
   
