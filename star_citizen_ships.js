@@ -78,33 +78,48 @@ function findShip(searchName) {
 }
 
 function findShipPermuteName(searchName) {
-  const promises = []
-  promises.push(findShip(searchName));
-  
-  let shortName = searchName;
-  while (shortName.split(' ').length > 1) {
-    shortName = shortName.split(' ').slice(1).join(' ');
-    promises.push(findShip(shortName));
-  }
-  
-  shortName = searchName;
-  while (shortName.split(' ').length > 1) {
-    shortName = shortName.split(' ').slice(0, -1).join(' ');
-    promises.push(findShip(shortName));
-  }
+  return findShip(searchName)
+    .then(ship => {
+        if (ship) {
+          return ship;
+        }
+    
+        const promises = [];
+        let shortName = searchName;
+        while (shortName.split(' ').length > 1) {
+          shortName = shortName.split(' ').slice(1).join(' ');
+          promises.push(findShip(shortName));
 
-  return Promise.all(promises)
-    .then(candidates => {
-       validCandidates = candidates.filter(c => c);
-      if (validCandidates.length > 0) {
-        return validCandidates[0];
-      } else {
-        console.error(searchName, uri, detailsUri, 'count not find');
-        return {
-          searchName,
-          error: 'could not find',
-        };
-      }
+          if (shortName.split(' ').length > 1) {
+            const shortNameB = shortName.split(' ').slice(0, -1).join(' ');
+            promises.push(findShip(shortNameB));
+          }
+        }
+
+        shortName = searchName;
+        while (shortName.split(' ').length > 1) {
+          shortName = shortName.split(' ').slice(0, -1).join(' ');
+          promises.push(findShip(shortName));
+
+          if (shortName.split(' ').length > 1) {
+            const shortNameB = shortName.split(' ').slice(1).join(' ');
+            promises.push(findShip(shortNameB));
+          }
+        }
+
+        return Promise.all(promises)
+          .then(candidates => {
+             validCandidates = candidates.filter(c => c);
+            if (validCandidates.length > 0) {
+              return validCandidates[0];
+            } else {
+              console.error(searchName, 'count not find');
+              return {
+                searchName,
+                error: 'could not find',
+              };
+            }
+          });
     });
 }
 
