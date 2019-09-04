@@ -78,31 +78,34 @@ function findShip(searchName) {
 }
 
 function findShipPermuteName(searchName) {
-  const candidates = []
-  candidates.push(findShip(searchName));
+  const promises = []
+  promises.push(findShip(searchName));
   
   let shortName = searchName;
   while (shortName.split(' ').length > 1) {
     shortName = shortName.split(' ').slice(1).join(' ');
-    candidates.push(findShip(shortName));
+    promises.push(findShip(shortName));
   }
   
   shortName = searchName;
   while (shortName.split(' ').length > 1) {
     shortName = shortName.split(' ').slice(0, -1).join(' ');
-    candidates.push(findShip(shortName));
+    promises.push(findShip(shortName));
   }
 
-  validCandidates = candidates.filter(c => c);
-  if (validCandidates.length > 0) {
-    return validCandidates[0];
-  } else {
-    console.error(searchName, uri, detailsUri, 'count not find');
-    return {
-      searchName,
-      error: 'could not find',
-    };
-  }
+  return Promise.all(promises)
+    .then(candidates => {
+       validCandidates = candidates.filter(c => c);
+      if (validCandidates.length > 0) {
+        return validCandidates[0];
+      } else {
+        console.error(searchName, uri, detailsUri, 'count not find');
+        return {
+          searchName,
+          error: 'could not find',
+        };
+      }
+    });
 }
 
 window.ships = Promise.all(collectItems()
