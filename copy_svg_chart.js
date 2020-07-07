@@ -27,4 +27,16 @@ const createCopyMenuItem = (parentDiv) => {
   };
   highchartsMenu.appendChild(copyMenuItem);
  };
- createCopyMenuItem(document.getElementById('sa_tmc_scatter'));
+ 
+ waitFunc = () => {
+ 	const parentDiv = document.getElementById("sa_tmc_scatter");
+ 	if (parentDiv) {
+ 		const highchartsMenuButton = parentDiv.getElementsByClassName('highcharts-contextbutton')[0];
+ 		const createFunc = () => {
+ 			createCopyMenuItem(parentDiv);
+ 			highchartsMenuButton.removeEventListener('click', createFunc);
+ 		};
+ 		highchartsMenuButton.addEventListener('click', createFunc);
+ 	}
+ };
+ $(document).ready(waitFunc);
